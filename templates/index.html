@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="GTAA" />
+  <title>GTAA Momentum</title>
+  <style>
+    /* ── Reset & Base ── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #0a0e14;
+      --surface:   #111820;
+      --border:    #1e2a38;
+      --accent:    #00d4ff;
+      --accent2:   #00ff88;
+      --warn:      #ff6b35;
+      --text:      #e8f0f8;
+      --muted:     #5a7a99;
+      --green:     #00c97a;
+      --red:       #ff4560;
+      --font-mono: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+    }
+
+    html, body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-sans);
+      min-height: 100dvh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Layout ── */
+    .app {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 0 env(safe-area-inset-bottom, 24px);
+    }
+
+    /* ── Header ── */
+    header {
+      padding: 56px 20px 20px;
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      background: var(--bg);
+      z-index: 10;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .header-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+    }
+
+    .wordmark {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: var(--text);
+      line-height: 1.1;
+    }
+
+    h1 span {
+      color: var(--accent);
+    }
+
+    .refresh-btn {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 4px;
+      transition: all 0.15s;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .refresh-btn:active {
+      background: var(--border);
+      transform: scale(0.96);
+    }
+
+    /* ── Status Bar ── */
+    .status-bar {
+      display: flex;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 5px 12px;
+      font-size: 12px;
+      font-family: var(--font-mono);
+    }
+
+    .dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--muted);
+    }
+
+    .dot.green { background: var(--green); box-shadow: 0 0 6px var(--green); }
+    .dot.red   { background: var(--red);   box-shadow: 0 0 6px var(--red); }
+
+    /* ── Main ── */
+    main {
+      padding: 16px 16px 0;
+    }
+
+    /* ── Section Labels ── */
+    .section-label {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      padding: 16px 4px 8px;
+    }
+
+    /* ── ETF Cards ── */
+    .etf-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .etf-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      display: grid;
+      grid-template-columns: 28px 1fr auto;
+      align-items: center;
+      gap: 12px;
+      transition: border-color 0.15s;
+    }
+
+    .etf-card:active {
+      border-color: var(--accent);
+    }
+
+    .etf-card.slope-warn {
+      border-left: 3px solid var(--warn);
+    }
+
+    .rank-num {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .etf-info { min-width: 0; }
+
+    .etf-ticker {
+      font-size: 17px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      color: var(--text);
+    }
+
+    .etf-sub {
+      display: flex;
+      gap: 10px;
+      margin-top: 3px;
+      align-items: center;
+    }
+
+    .slope-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(0, 201, 122, 0.12);
+      color: var(--green);
+      border: 1px solid rgba(0, 201, 122, 0.25);
+    }
+
+    .slope-tag.warn {
+      background: rgba(255, 107, 53, 0.12);
+      color: var(--warn);
+      border-color: rgba(255, 107, 53, 0.25);
+    }
+
+    .slope-val {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--muted);
+    }
+
+    .momentum-col { text-align: right; }
+
+    .momentum-val {
+      font-family: var(--font-mono);
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .momentum-val.pos { color: var(--green); }
+    .momentum-val.neg { color: var(--red); }
+
+    .momentum-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: var(--muted);
+      text-align: right;
+      margin-top: 2px;
+      letter-spacing: 0.1em;
+    }
+
+    /* ── Momentum Bar ── */
+    .bar-wrap {
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+
+    .bar-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+      transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* ── Market Off Banner ── */
+    .market-off-banner {
+      background: rgba(255, 69, 96, 0.1);
+      border: 1px solid rgba(255, 69, 96, 0.3);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 13px;
+      color: var(--red);
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Loading ── */
+    .loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 80px 20px;
+      gap: 16px;
+    }
+
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .loading-text {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+    }
+
+    /* ── Error ── */
+    .error-box {
+      background: rgba(255, 69, 96, 0.08);
+      border: 1px solid rgba(255, 69, 96, 0.25);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      margin: 40px 0;
+    }
+
+    .error-box p {
+      font-size: 13px;
+      color: var(--red);
+      font-family: var(--font-mono);
+      margin-bottom: 12px;
+    }
+
+    .error-box button {
+      background: transparent;
+      border: 1px solid var(--red);
+      color: var(--red);
+      font-family: var(--font-mono);
+      font-size: 11px;
+      padding: 8px 16px;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    /* ── Footer ── */
+    footer {
+      padding: 24px 20px 12px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      letter-spacing: 0.05em;
+      line-height: 1.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div class="header-top">
+        <div>
+          <div class="wordmark">GTAA Strategy</div>
+          <h1>Momentum <span>Rankings</span></h1>
+        </div>
+        <button class="refresh-btn" onclick="loadData()">↻ REFRESH</button>
+      </div>
+      <div class="status-bar" id="status-bar">
+        <div class="status-pill">
+          <div class="dot" id="market-dot"></div>
+          <span id="market-label">—</span>
+        </div>
+        <div class="status-pill">
+          <span id="as-of-label">Loading…</span>
+        </div>
+      </div>
+    </header>
+
+    <main id="main-content">
+      <div class="loading">
+        <div class="spinner"></div>
+        <div class="loading-text">FETCHING RANKINGS…</div>
+      </div>
+    </main>
+
+    <footer>
+      20d + 60d + 120d momentum · OLS slope filter<br>
+      TIP regime signal · Not financial advice
+    </footer>
+  </div>
+
+  <script>
+    async function loadData() {
+      const main = document.getElementById('main-content');
+      main.innerHTML = `
+        <div class="loading">
+          <div class="spinner"></div>
+          <div class="loading-text">FETCHING RANKINGS…</div>
+        </div>`;
+
+      document.getElementById('as-of-label').textContent = 'Loading…';
+      document.getElementById('market-label').textContent = '—';
+      document.getElementById('market-dot').className = 'dot';
+
+      try {
+        const res  = await fetch('/api/rankings');
+        const json = await res.json();
+
+        if (json.status !== 'ok') throw new Error(json.message || 'Unknown error');
+
+        renderData(json.data);
+      } catch (err) {
+        main.innerHTML = `
+          <div class="error-box">
+            <p>Failed to load rankings</p>
+            <p style="font-size:10px;margin-bottom:12px;">${err.message}</p>
+            <button onclick="loadData()">Try again</button>
+          </div>`;
+      }
+    }
+
+    function renderData(data) {
+      // Status bar
+      const dot   = document.getElementById('market-dot');
+      const label = document.getElementById('market-label');
+      if (data.market_on) {
+        dot.className   = 'dot green';
+        label.textContent = `MARKET ON  TIP ${data.tip_signal > 0 ? '+' : ''}${data.tip_signal}%`;
+      } else {
+        dot.className   = 'dot red';
+        label.textContent = `CASH SIGNAL  TIP ${data.tip_signal}%`;
+      }
+      document.getElementById('as-of-label').textContent = `AS OF ${data.as_of}`;
+
+      const main = document.getElementById('main-content');
+
+      // Market off warning
+      let html = '';
+      if (!data.market_on) {
+        html += `<div class="market-off-banner">⚠ TIP momentum negative — strategy signals cash</div>`;
+      }
+
+      // Find max momentum for bar scaling
+      const maxMom = Math.max(...data.rankings.map(e => Math.abs(e.momentum)));
+
+      html += `<div class="section-label">Top ${data.rankings.length} ETFs by Momentum</div>`;
+      html += `<div class="etf-list">`;
+
+      data.rankings.forEach(etf => {
+        const momClass   = etf.momentum >= 0 ? 'pos' : 'neg';
+        const momSign    = etf.momentum >= 0 ? '+' : '';
+        const slopeClass = etf.trend_ok ? '' : 'warn';
+        const slopeLabel = etf.trend_ok ? '↗ TREND OK' : '↘ WEAK SLOPE';
+        const barWidth   = maxMom > 0 ? Math.abs(etf.momentum) / maxMom * 100 : 0;
+        const cardClass  = etf.trend_ok ? '' : 'slope-warn';
+
+        html += `
+          <div class="etf-card ${cardClass}">
+            <div class="rank-num">${etf.rank}</div>
+            <div class="etf-info">
+              <div class="etf-ticker">${etf.ticker}</div>
+              <div class="etf-sub">
+                <span class="slope-tag ${slopeClass}">${slopeLabel}</span>
+                <span class="slope-val">slope ${etf.slope > 0 ? '+' : ''}${etf.slope}</span>
+              </div>
+              <div class="bar-wrap">
+                <div class="bar-fill" style="width:${barWidth.toFixed(1)}%"></div>
+              </div>
+            </div>
+            <div class="momentum-col">
+              <div class="momentum-val ${momClass}">${momSign}${etf.momentum}%</div>
+              <div class="momentum-label">MOMENTUM</div>
+            </div>
+          </div>`;
+      });
+
+      html += `</div>`;
+      main.innerHTML = html;
+    }
+
+    // Load on start
+    loadData();
+  </script>
+</body>
+</html>
