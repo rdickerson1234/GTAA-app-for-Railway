@@ -47,7 +47,7 @@ def fetch_and_rank(top_n=15):
 
     # TIP regime filter
     tip_score = score["TIP"].iloc[-1] if "TIP" in score.columns else 1
-    market_on = tip_score >= 0
+    market_on = bool(tip_score >= 0)
 
     # Top N by momentum score
     today_scores = score.iloc[-1].dropna()
@@ -78,7 +78,7 @@ def fetch_and_rank(top_n=15):
             "ticker":     ticker,
             "momentum":   round(mom_score * 100, 2),   # as %
             "slope":      round(slope, 4),
-            "trend_ok":   slope > 0,
+            "trend_ok":   bool(slope > 0),
         })
 
     return {
